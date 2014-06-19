@@ -39,10 +39,14 @@ WiFiClient client;
 boolean ftime;
 String name;
 // reconnection global because used if disconnected or if not first time
+String fn;
 String recon;
 String watchdog;
+String error_in_format;
 byte buffer[10];
 int i=0;
+int lamp=8;
+int latch=9;
 // to be removed *************
 int x;
 
@@ -56,6 +60,9 @@ void setup() {
   Serial.print("SSID: ");
   Serial.println(ssid);
   
+//initialise pins  
+   pinMode(lamp,OUTPUT);
+   pinMode(latch,OUTPUT);
 // intiate connection to wifi
   status = WiFi.begin(ssid, pass);
   
@@ -81,7 +88,7 @@ void setup() {
        ftime=EEPROM.read(e1);
 // if first time send 
        if(ftime){
-         String fn= "0,,,,,.";
+         fn= "0,,,,,.";
          client.print(fn);
 // just to observe
          Serial.println(fn);
@@ -112,16 +119,21 @@ void get_name_from_mem(){
 void reconnection(){
      recon="1,";
      watchdog="2,";
+     error_in_format="9,";
      String recon_2=",,,,.";
      recon+=name;
      recon+=recon_2;
      watchdog+=name;
-     watchdog+=recon_2;   
+     watchdog+=recon_2; 
+     error_in_format+=name;
+     error_in_format+=recon_2;  
 }
 
 void loop (){
   
-  read_data();
+ read_data();
+ if (ftime=false){ 
+  
 ///////////////////*************/////////////////////////////  
 //  To be changed just to test new server
     x++;
@@ -130,7 +142,7 @@ void loop (){
     Serial.println(watchdog);
     x=0;
   }
-  
+ } 
 //////////////////****************///////////////////////////  
   
 // check if dissconnected from server
@@ -143,8 +155,15 @@ void loop (){
     
 //send reconnection command 
      if (client.connected()){
-      client.print(recon);
-      Serial.println(recon);
+// if not first time send reconnection command       
+       if (ftime=false){
+          client.print(recon);
+          Serial.println(recon);
+       }else{
+// if first time request a name 
+         client.print(fn);
+         Serial.println(fn);
+       }
      }
     
 //Try to reconnect
@@ -168,9 +187,83 @@ void read_data(){
     }
     
 // return buffer to 0  
-  i=0;
-  
+  i=0;  
+  }
+ // 1st level check if formate is okay 
+ if ((buffer[0]==byte(46))&&(buffer[10]==byte(46))&&(buffer[2]==byte(44))&&(buffer[5]==byte(44))&&(buffer[8]==byte(44)) ){ 
+
+//to test recived name is the same as the name i have   
+   String test_name((char)buffer[3]);
+   test_name +=(char)buffer[4];
+   
+   switch (buffer[1]){
+ // case 1 recive my requested name  
+     case byte(1):
+       if (buffer[9]==byte(77)){
+       ftime= false;  
+       EEPROM.write(e1, ftime);
+       EEPROM.write(e2, buffer[3]);
+       EEPROM.write(e3, buffer[4]);
+       String name((char)buffer[3]);
+       name +=(char)buffer[4];
+       }
+     break;
+// case 2 do action      
+     case byte(2):
+       if (name==test_name){
+        Action(); 
+       }
+     break;
+// server request me to change name     
+     case byte(3):
+       if (name==test_name){
+         EEPROM.write(e2, buffer[6]);
+         EEPROM.write(e3, buffer[7]);
+         String name((char)buffer[6]);
+         name +=(char)buffer[7];       
+       }
+     break;
+// report error to server     
+     default:
+       if(ftime)
+         client.print(fn);
+        else
+         client.print(error_in_format);
+   }  
+ }else{
+   client.print(error_in_format);
+ }
 }
-  
-  
+
+void Action(){
+  String user((char)buffer[6]);
+  user +=(char)buffer[7]; 
+  String ack ="3,";
+  ack+=name;
+  ack+=",";
+  ack+=user;
+  switch(buffer[9]){
+    case byte(255):
+      digitalWrite(lamp,HIGH);
+      digitalWrite(latch,HIGH);
+      ack+=",on,,.";
+      client.print(ack);
+ // monitor
+      Serial.print(ack);
+    break;
+    
+    case byte(0):
+      digitalWrite(lamp,LOW);
+      digitalWrite(latch,HIGH);
+      ack+=",off,,.";
+      client.print(ack);
+ // monitor
+      Serial.print(ack);      
+    break;
+    
+    default:
+      client.print(error_in_format);
+  }
 }
+
+
