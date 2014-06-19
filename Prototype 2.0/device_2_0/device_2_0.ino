@@ -43,7 +43,7 @@ String fn;
 String recon;
 String watchdog;
 String error_in_format;
-byte buffer[10];
+byte buffer[11];
 int i=0;
 int lamp=8;
 int latch=9;
@@ -175,7 +175,7 @@ void read_data(){
   
   if (client.connected()){ 
 // to read incoming bytes and get out when there are no bytes to read
-    while((client.available())&&(i<11)) { 
+    while((client.available())&&(i<12)) { 
 //reads byte by byte from available data
        byte c = client.read();
        
