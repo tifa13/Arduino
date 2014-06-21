@@ -19,7 +19,7 @@
 #include <EEPROM.h>
 
 //places in EEPROM to save first time flag(intially OXFF), name bit 1 and bit 2
-int e1=62;
+int e1=83;
 int e2=e1+1;
 int e3=e1+2;
 
@@ -29,7 +29,7 @@ char pass[] = "01005381961";
 int status = WL_IDLE_STATUS;
 
 // IP & portn number of server because TCP
-IPAddress server(192,168,1,5);
+IPAddress server(192,168,1,3);
 int port=14;
 
 // Initialize the client library
@@ -97,7 +97,7 @@ void setup() {
 // if not first time just reconnectrion       
        else{
          get_name_from_mem();
-         reconnection();
+         format_commands();
          client.print(recon);
 // just to observe 
          Serial.println(recon);
@@ -116,7 +116,7 @@ void get_name_from_mem(){
 }
 
 // in a seprate function because used more then one time in different places
-void reconnection(){
+void format_commands(){
      recon="1,";
      watchdog="2,";
      error_in_format="9,";
@@ -132,10 +132,10 @@ void reconnection(){
 void loop (){
   
  read_data();
- if (ftime=false){ 
-  
+ 
+ if (ftime==false){ 
 ///////////////////*************/////////////////////////////  
-//  To be changed just to test new server
+//  To be changed just to test new server 
     x++;
   if(x==1000){
     client.print(watchdog);
@@ -156,7 +156,7 @@ void loop (){
 //send reconnection command 
      if (client.connected()){
 // if not first time send reconnection command       
-       if (ftime=false){
+       if (!ftime){
           client.print(recon);
           Serial.println(recon);
        }else{
@@ -180,7 +180,7 @@ void read_data(){
        byte c = client.read();
        
 // to see incoming messages in serial monitor
-       //Serial.println(c);
+       Serial.println(c);
        
 // put bytes that are read in a buffer
        buffer[i++]=c;
@@ -191,37 +191,40 @@ void read_data(){
   }
  // 1st level check if formate is okay 
  if ((buffer[0]==byte(46))&&(buffer[10]==byte(46))&&(buffer[2]==byte(44))&&(buffer[5]==byte(44))&&(buffer[8]==byte(44)) ){ 
-
 //to test recived name is the same as the name i have   
    String test_name((char)buffer[3]);
    test_name +=(char)buffer[4];
-   
    switch (buffer[1]){
- // case 1 recive my requested name  
-     case byte(1):
-       if (buffer[9]==byte(77)){
-       ftime= false;  
-       EEPROM.write(e1, ftime);
-       EEPROM.write(e2, buffer[3]);
-       EEPROM.write(e3, buffer[4]);
-       String name((char)buffer[3]);
-       name +=(char)buffer[4];
+ // case 1( 49 asci) recive my requested name  
+     case 49:
+       if (ftime){
+//M is 77 in asci
+         if (buffer[9]==77){
+           ftime=false;  
+           EEPROM.write(e1, ftime);
+           EEPROM.write(e2, buffer[3]);
+           EEPROM.write(e3, buffer[4]);
+           String name((char)buffer[3]);
+           name +=(char)buffer[4];
+           Serial.println(name);
+           format_commands();
+         }
        }
-     break;
-// case 2 do action      
-     case byte(2):
-       if (name==test_name){
-        Action(); 
-       }
-     break;
-// server request me to change name     
-     case byte(3):
-       if (name==test_name){
-         EEPROM.write(e2, buffer[6]);
-         EEPROM.write(e3, buffer[7]);
-         String name((char)buffer[6]);
-         name +=(char)buffer[7];       
-       }
+       break;
+  // case 2(50 asci) do action      
+       case 50:
+         if (name==test_name){
+          Action(); 
+         }
+       break;
+  // case 3 (51 asci)server request me to change name     
+       case 51:
+         if (name==test_name){
+           EEPROM.write(e2, buffer[6]);
+           EEPROM.write(e3, buffer[7]);
+           String name((char)buffer[6]);
+           name +=(char)buffer[7];       
+         }
      break;
 // report error to server     
      default:
