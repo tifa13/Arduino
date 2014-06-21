@@ -133,7 +133,7 @@ void loop (){
   
  read_data();
  
- if (ftime==false){ 
+ if (!ftime){ 
 ///////////////////*************/////////////////////////////  
 //  To be changed just to test new server 
     x++;
@@ -195,7 +195,7 @@ void read_data(){
    String test_name((char)buffer[3]);
    test_name +=(char)buffer[4];
    switch (buffer[1]){
- // case 1( 49 asci) recive my requested name  
+ // case 1(49 asci) recive my requested name  
      case 49:
        if (ftime){
 //M is 77 in asci
