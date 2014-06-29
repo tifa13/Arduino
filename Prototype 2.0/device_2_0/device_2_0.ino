@@ -19,17 +19,17 @@
 #include <EEPROM.h>
 
 //places in EEPROM to save first time flag(intially OXFF), name bit 1 and bit 2
-int e1=89;
+int e1=92;
 int e2=e1+1;
 int e3=e1+2;
 
 // Netowrk SSID & Password
-char ssid[] = "mostafa";  
-char pass[] = "01005381961";  
+char ssid[] = "Mostafaalex";  
+char pass[] = "mostafaaucalex";  
 int status = WL_IDLE_STATUS;
 
 // IP & portn number of server because TCP
-IPAddress server(192,168,1,2);
+IPAddress server(192,168,1,3);
 int port=14;
 
 // Initialize the client library
