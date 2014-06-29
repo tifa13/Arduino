@@ -19,7 +19,7 @@
 #include <EEPROM.h>
 
 //places in EEPROM to save first time flag(intially OXFF), name bit 1 and bit 2
-int e1=86;
+int e1=89;
 int e2=e1+1;
 int e3=e1+2;
 
@@ -88,7 +88,7 @@ void setup() {
        ftime=EEPROM.read(e1);
 // if first time send 
        if(ftime){
-         fn= "0,,,,,.";
+         fn= "070,,,,,.";
          client.print(fn);
 // just to observe
          Serial.println(fn);
@@ -117,9 +117,9 @@ void get_name_from_mem(){
 
 // in a seprate function because used more then one time in different places
 void format_commands(){
-     recon="1,";
-     watchdog="2,";
-     error_in_format="9,";
+     recon="091,";
+     watchdog="092,";
+     error_in_format="089,";
      String recon_2=",,,,.";
      recon+=name;
      recon+=recon_2;
@@ -248,7 +248,7 @@ void read_data(){
 void Action(){
   String user((char)buffer[6]);
   user +=(char)buffer[7]; 
-  String ack ="3,";
+  String ack ="113,";
   ack+=name;
   ack+=",";
   ack+=user;
