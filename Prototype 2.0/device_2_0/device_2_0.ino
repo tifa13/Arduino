@@ -19,17 +19,17 @@
 #include <EEPROM.h>
 
 //places in EEPROM to save first time flag(intially OXFF), name bit 1 and bit 2
-int e1=92;
+int e1=113;
 int e2=e1+1;
 int e3=e1+2;
 
 // Netowrk SSID & Password
-char ssid[] = "Mostafaalex";  
-char pass[] = "mostafaaucalex";  
+char ssid[] = "mostafa";  
+char pass[] = "01005381961";  
 int status = WL_IDLE_STATUS;
 
 // IP & portn number of server because TCP
-IPAddress server(192,168,1,3);
+IPAddress server(192,168,1,2);
 int port=14;
 
 // Initialize the client library
@@ -88,7 +88,7 @@ void setup() {
        ftime=EEPROM.read(e1);
 // if first time send 
        if(ftime){
-         fn= "070,,,,,.";
+         fn= "060,,,,,";
          client.print(fn);
 // just to observe
          Serial.println(fn);
@@ -117,10 +117,10 @@ void get_name_from_mem(){
 
 // in a seprate function because used more then one time in different places
 void format_commands(){
-     recon="091,";
-     watchdog="092,";
-     error_in_format="089,";
-     String recon_2=",,,,.";
+     recon="081,";
+     watchdog="082,";
+     error_in_format="069,";
+     String recon_2=",,,,";
      recon+=name;
      recon+=recon_2;
      watchdog+=name;
@@ -248,7 +248,7 @@ void read_data(){
 void Action(){
   String user((char)buffer[6]);
   user +=(char)buffer[7]; 
-  String ack ="113,";
+  String ack ="103,";
   ack+=name;
   ack+=",";
   ack+=user;
@@ -256,7 +256,7 @@ void Action(){
     case byte(255):
       digitalWrite(lamp,HIGH);
       digitalWrite(latch,HIGH);
-      ack+=",on,,.";
+      ack+=",on,,";
       client.print(ack);
  // monitor
       Serial.print(ack);
@@ -265,7 +265,7 @@ void Action(){
     case byte(0):
       digitalWrite(lamp,LOW);
       digitalWrite(latch,HIGH);
-      ack+=",off,,.";
+      ack+=",off,,";
       client.print(ack);
  // monitor
       Serial.print(ack);      
