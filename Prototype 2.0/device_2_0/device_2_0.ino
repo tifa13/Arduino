@@ -19,11 +19,17 @@
 #include <EEPROM.h>
 
 //places in EEPROM to save first time flag(intially OXFF), name bit 1 and bit 2
+<<<<<<< HEAD
 
 int e1=180;
 int e2=e1+1;
 int e3=e1+2;
 
+=======
+int e1=92;
+int e2=e1+1;
+int e3=e1+2;
+>>>>>>> parent of 0905b6e... Small changes
 
 // Netowrk SSID & Password
 char ssid[] = "Mostafaalex";  
@@ -90,9 +96,14 @@ void setup() {
        ftime=EEPROM.read(e1);
 // if first time send 
        if(ftime){
+<<<<<<< HEAD
          fn= "0,,,,,.";
          client.print(fn);
 
+=======
+         fn= "070,,,,,.";
+         client.print(fn);
+>>>>>>> parent of 0905b6e... Small changes
 // just to observe
          Serial.println(fn);
          read_data();
@@ -120,16 +131,26 @@ void get_name_from_mem(){
 
 // in a seprate function because used more then one time in different places
 void format_commands(){
+<<<<<<< HEAD
      recon="1,";
      watchdog="2,";
      error_in_format="9,";
+=======
+     recon="091,";
+     watchdog="092,";
+     error_in_format="089,";
+>>>>>>> parent of 0905b6e... Small changes
      String recon_2=",,,,.";
      recon+=name;
      recon+=recon_2;
      watchdog+=name;
      watchdog+=recon_2; 
      error_in_format+=name;
+<<<<<<< HEAD
      error_in_format+=recon_2; 
+=======
+     error_in_format+=recon_2;  
+>>>>>>> parent of 0905b6e... Small changes
 }
 
 void loop (){
@@ -192,6 +213,7 @@ void read_data(){
 // return buffer to 0  
   i=0;  
   }
+<<<<<<< HEAD
  // 1st level check if formate is okay 
  if ((buffer[0]==byte(46))&&(buffer[10]==byte(46))&&(buffer[2]==byte(44))&&(buffer[5]==byte(44))&&(buffer[8]==byte(44)) ){ 
 //to test recived name is the same as the name i have   
@@ -219,6 +241,47 @@ void read_data(){
          if (name==test_name){
           Action(); 
          }
+=======
+
+// only to go in if read data and buffer is full  
+  if (i==11){
+// 1st level check if formate is okay 
+   if ((buffer[0]==byte(46))&&(buffer[10]==byte(46))&&(buffer[2]==byte(44))&&(buffer[5]==byte(44))&&(buffer[8]==byte(44)) ){ 
+//to test recived name is the same as the name i have   
+     String test_name((char)buffer[3]);
+     test_name +=(char)buffer[4];
+     switch (buffer[1]){
+// case 1(49 asci) recive my requested name  
+       case 49:
+         if (ftime){
+//M is 77 in asci
+           if (buffer[9]==77){
+             ftime=false;  
+             EEPROM.write(e1, ftime);
+             EEPROM.write(e2, buffer[3]);
+             EEPROM.write(e3, buffer[4]);
+             String name((char)buffer[3]);
+             name +=(char)buffer[4];
+             Serial.println(name);
+             format_commands();
+           }
+         }
+         break;
+// case 2(50 asci) do action      
+         case 50:
+           if (name==test_name){
+            Action(); 
+           }
+         break;
+// case 3 (51 asci)server request me to change name     
+         case 51:
+           if (name==test_name){
+             EEPROM.write(e2, buffer[6]);
+             EEPROM.write(e3, buffer[7]);
+             String name((char)buffer[6]);
+             name +=(char)buffer[7];       
+           }
+>>>>>>> parent of 0905b6e... Small changes
        break;
   // case 3 (51 asci)server request me to change name     
        case 51:
@@ -230,6 +293,7 @@ void read_data(){
          }
      break;
 // report error to server     
+<<<<<<< HEAD
      default:
        if(ftime)
          client.print(fn);
@@ -239,6 +303,21 @@ void read_data(){
  }else{
    client.print(error_in_format);
  }
+=======
+       default:
+         if(ftime)
+           client.print(fn);
+          else
+           client.print(error_in_format);
+     }  
+   }else{
+     client.print(error_in_format);
+   }
+       
+// return buffer to 0  
+  i=0;  
+  }
+>>>>>>> parent of 0905b6e... Small changes
 }
 
 void Action(){
