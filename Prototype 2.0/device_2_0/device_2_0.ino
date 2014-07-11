@@ -20,10 +20,14 @@
 
 //places in EEPROM to save first time flag(intially OXFF), name bit 1 and bit 2
 <<<<<<< HEAD
+<<<<<<< HEAD
 int e1=92;
 =======
 int e1=83;
 >>>>>>> parent of d9bf5df... solved reconnection issue & sending error command
+=======
+int e1=86;
+>>>>>>> parent of d03e8a8... adding length
 int e2=e1+1;
 int e3=e1+2;
 
@@ -93,7 +97,7 @@ void setup() {
        ftime=EEPROM.read(e1);
 // if first time send 
        if(ftime){
-         fn= "070,,,,,.";
+         fn= "0,,,,,.";
          client.print(fn);
 
 // just to observe
@@ -123,9 +127,9 @@ void get_name_from_mem(){
 
 // in a seprate function because used more then one time in different places
 void format_commands(){
-     recon="091,";
-     watchdog="092,";
-     error_in_format="089,";
+     recon="1,";
+     watchdog="2,";
+     error_in_format="9,";
      String recon_2=",,,,.";
      recon+=name;
      recon+=recon_2;
@@ -247,7 +251,11 @@ void read_data(){
 void Action(){
   String user((char)buffer[6]);
   user +=(char)buffer[7]; 
+<<<<<<< HEAD
   String ack ="103,";
+=======
+  String ack ="3,";
+>>>>>>> parent of d03e8a8... adding length
   ack+=name;
   ack+=",";
   ack+=user;
