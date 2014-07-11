@@ -18,17 +18,11 @@
 // liberary to save to EEPROM
 #include <EEPROM.h>
 
-<<<<<<< HEAD
 //places in EEPROM to save first time flag(intially OXFF), name bit 1 and bit 2
-int e1=113;
+int e1=92;
 int e2=e1+1;
 int e3=e1+2;
-=======
-//places in EEPROM to save first time flag(intially OXFF), name byte 1 and byte 2
-int FirstTimeFlagLocation = 92;
-int NameByte1Location = FirstTimeFlagLocation + 1;
-int NameByte2Location = FirstTimeFlagLocation + 2;
->>>>>>> origin/master
+
 
 // Netowrk SSID & Password
 char ssid[] = "mostafa";  
@@ -43,13 +37,12 @@ int port=14;
 WiFiClient client;
 
 // intialise first time flag
-boolean FirstTimeFlag;
+boolean ftime;
 String name;
-
 // reconnection global because used if disconnected or if not first time
-String FirstNameCommand;
-String ReconnectionCommand;
-String WatchdogCommand;
+String fn;
+String recon;
+String watchdog;
 String error_in_format;
 byte buffer[11];
 int i=0;
@@ -93,84 +86,62 @@ void setup() {
 //if connected to server ( just another check to be sure msh lazem    
      if (client.connect(server, port)){
 // read flag from memory 
-       FirstTimeFlag = EEPROM.read(FirstTimeFlagLocation);
+       ftime=EEPROM.read(e1);
 // if first time send 
-<<<<<<< HEAD
        if(ftime){
-         fn= "060,,,,,";
+         fn= "070,,,,,.";
          client.print(fn);
-=======
-       if(FirstTimeFlag){
-         FirstNameCommand = "060,,,,,";
-         client.print(FirstNameCommand);
->>>>>>> origin/master
+
 // just to observe
-         Serial.println(FirstNameCommand);
+         Serial.println(fn);
          read_data();
        }
 // if not first time just reconnectrion       
        else{
          get_name_from_mem();
          format_commands();
-         client.print(ReconnectionCommand);
+         client.print(recon);
 // just to observe 
-         Serial.println(ReconnectionCommand);
+         Serial.println(recon);
        }
      }
   }
 }
-//end of setup function
 
 // getting name from memory if not first time
 void get_name_from_mem(){
-     char temp;
-     temp = EEPROM.read(NameByte1Location);
-     name = (String)temp;
-     temp = EEPROM.read(NameByte2Location);
-     name += temp;       
+     char name_1;
+     name_1=EEPROM.read(e2);
+     name=(String)name_1;
+     name_1=EEPROM.read(e3);
+     name+=name_1;       
 }
 
 // in a seprate function because used more then one time in different places
 void format_commands(){
-<<<<<<< HEAD
-     recon="081,";
-     watchdog="082,";
-     error_in_format="069,";
-     String recon_2=",,,,";
+     recon="091,";
+     watchdog="092,";
+     error_in_format="089,";
+     String recon_2=",,,,.";
      recon+=name;
      recon+=recon_2;
      watchdog+=name;
      watchdog+=recon_2; 
      error_in_format+=name;
-     error_in_format+=recon_2;  
-=======
-     ReconnectionCommand = "081,";
-     WatchdogCommand = "082,";
-     error_in_format = "069,";
-     String temp = ",,,,";
-     
-     ReconnectionCommand += name;
-     ReconnectionCommand += temp;
-     
-     WatchdogCommand += name;
-     WatchdogCommand += temp; 
-     
-     error_in_format += name;
-     error_in_format += temp;  
->>>>>>> origin/master
+     error_in_format+=recon_2; 
 }
 
 void loop (){
   
  read_data();
  
- if (!FirstTimeFlag){ 
+ if (!ftime){ 
 ///////////////////*************/////////////////////////////  
 //  To be changed just to test new server 
     x++;
   if(x==1000){
-    client.print(WatchdogCommand);
-    Serial.println(WatchdogCommand);
+    client.print(watchdog);
+    Serial.println(watchdog);
     x=0;
   }
  } 
@@ -191,20 +162,18 @@ void loop (){
 //send reconnection command 
      if (client.connected()){
 // if not first time send reconnection command       
-       if (!FirstTimeFlag){
-          client.print(ReconnectionCommand);
-          Serial.println(ReconnectionCommand);
-       }
-    else{
+       if (!ftime){
+          client.print(recon);
+          Serial.println(recon);
+       }else{
 // if first time request a name 
-         client.print(FirstNameCommand);
-         Serial.println(FirstNameCommand);
+         client.print(fn);
+         Serial.println(fn);
        }
      }
 
   }
 }
-//end of loop function
 
 void read_data(){
   
@@ -225,7 +194,7 @@ void read_data(){
 
 // only to go in if read data and buffer is full  
   if (i==11){
-// 1st level check if format is okay 
+// 1st level check if formate is okay 
    if ((buffer[0]==byte(46))&&(buffer[10]==byte(46))&&(buffer[2]==byte(44))&&(buffer[5]==byte(44))&&(buffer[8]==byte(44)) ){ 
 //to test recived name is the same as the name i have   
      String test_name((char)buffer[3]);
@@ -233,13 +202,13 @@ void read_data(){
      switch (buffer[1]){
 // case 1(49 asci) recive my requested name  
        case 49:
-         if (FirstTimeFlag){
+         if (ftime){
 //M is 77 in asci
            if (buffer[9]==77){
-             FirstTimeFlag=false;  
-             EEPROM.write(FirstTimeFlagLocation, FirstTimeFlag);
-             EEPROM.write(NameByte1Location, buffer[3]);
-             EEPROM.write(NameByte2Location, buffer[4]);
+             ftime=false;  
+             EEPROM.write(e1, ftime);
+             EEPROM.write(e2, buffer[3]);
+             EEPROM.write(e3, buffer[4]);
              String name((char)buffer[3]);
              name +=(char)buffer[4];
              Serial.println(name);
@@ -256,16 +225,16 @@ void read_data(){
 // case 3 (51 asci)server request me to change name     
          case 51:
            if (name==test_name){
-             EEPROM.write(NameByte1Location, buffer[6]);
-             EEPROM.write(NameByte2Location, buffer[7]);
+             EEPROM.write(e2, buffer[6]);
+             EEPROM.write(e3, buffer[7]);
              String name((char)buffer[6]);
              name +=(char)buffer[7];       
            }
        break;
 // report error to server     
        default:
-         if(FirstTimeFlag)
-           client.print(FirstNameCommand);
+         if(ftime)
+           client.print(fn);
           else
            client.print(error_in_format);
      }  
@@ -289,7 +258,7 @@ void Action(){
     case byte(255):
       digitalWrite(lamp,HIGH);
       digitalWrite(latch,HIGH);
-      ack+=",on,,";
+      ack+=",on,,.";
       client.print(ack);
  // monitor
       Serial.print(ack);
@@ -298,7 +267,7 @@ void Action(){
     case byte(0):
       digitalWrite(lamp,LOW);
       digitalWrite(latch,HIGH);
-      ack+=",off,,";
+      ack+=",off,,.";
       client.print(ack);
  // monitor
       Serial.print(ack);      
