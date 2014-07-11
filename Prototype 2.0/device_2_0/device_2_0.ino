@@ -19,7 +19,11 @@
 #include <EEPROM.h>
 
 //places in EEPROM to save first time flag(intially OXFF), name bit 1 and bit 2
+<<<<<<< HEAD
 int e1=92;
+=======
+int e1=83;
+>>>>>>> parent of d9bf5df... solved reconnection issue & sending error command
 int e2=e1+1;
 int e3=e1+2;
 
@@ -30,7 +34,7 @@ char pass[] = "01005381961";
 int status = WL_IDLE_STATUS;
 
 // IP & portn number of server because TCP
-IPAddress server(192,168,1,2);
+IPAddress server(192,168,1,3);
 int port=14;
 
 // Initialize the client library
@@ -149,10 +153,6 @@ void loop (){
   
 // check if dissconnected from server
   while (!(client.connected())) {
-    
-//Try to reconnect
-    client.connect(server, port);    
-    
 //Observing where am I
     Serial.println("disconnected from server");
     
@@ -171,7 +171,9 @@ void loop (){
          Serial.println(fn);
        }
      }
-
+    
+//Try to reconnect
+    client.connect(server, port);
   }
 }
 
@@ -189,62 +191,57 @@ void read_data(){
 // put bytes that are read in a buffer
        buffer[i++]=c;
     }
-
-  }
-
-// only to go in if read data and buffer is full  
-  if (i==11){
-// 1st level check if formate is okay 
-   if ((buffer[0]==byte(46))&&(buffer[10]==byte(46))&&(buffer[2]==byte(44))&&(buffer[5]==byte(44))&&(buffer[8]==byte(44)) ){ 
-//to test recived name is the same as the name i have   
-     String test_name((char)buffer[3]);
-     test_name +=(char)buffer[4];
-     switch (buffer[1]){
-// case 1(49 asci) recive my requested name  
-       case 49:
-         if (ftime){
-//M is 77 in asci
-           if (buffer[9]==77){
-             ftime=false;  
-             EEPROM.write(e1, ftime);
-             EEPROM.write(e2, buffer[3]);
-             EEPROM.write(e3, buffer[4]);
-             String name((char)buffer[3]);
-             name +=(char)buffer[4];
-             Serial.println(name);
-             format_commands();
-           }
-         }
-         break;
-// case 2(50 asci) do action      
-         case 50:
-           if (name==test_name){
-            Action(); 
-           }
-         break;
-// case 3 (51 asci)server request me to change name     
-         case 51:
-           if (name==test_name){
-             EEPROM.write(e2, buffer[6]);
-             EEPROM.write(e3, buffer[7]);
-             String name((char)buffer[6]);
-             name +=(char)buffer[7];       
-           }
-       break;
-// report error to server     
-       default:
-         if(ftime)
-           client.print(fn);
-          else
-           client.print(error_in_format);
-     }  
-   }else{
-     client.print(error_in_format);
-   }
-       
+    
 // return buffer to 0  
   i=0;  
   }
+ // 1st level check if formate is okay 
+ if ((buffer[0]==byte(46))&&(buffer[10]==byte(46))&&(buffer[2]==byte(44))&&(buffer[5]==byte(44))&&(buffer[8]==byte(44)) ){ 
+//to test recived name is the same as the name i have   
+   String test_name((char)buffer[3]);
+   test_name +=(char)buffer[4];
+   switch (buffer[1]){
+ // case 1(49 asci) recive my requested name  
+     case 49:
+       if (ftime){
+//M is 77 in asci
+         if (buffer[9]==77){
+           ftime=false;  
+           EEPROM.write(e1, ftime);
+           EEPROM.write(e2, buffer[3]);
+           EEPROM.write(e3, buffer[4]);
+           String name((char)buffer[3]);
+           name +=(char)buffer[4];
+           Serial.println(name);
+           format_commands();
+         }
+       }
+       break;
+  // case 2(50 asci) do action      
+       case 50:
+         if (name==test_name){
+          Action(); 
+         }
+       break;
+  // case 3 (51 asci)server request me to change name     
+       case 51:
+         if (name==test_name){
+           EEPROM.write(e2, buffer[6]);
+           EEPROM.write(e3, buffer[7]);
+           String name((char)buffer[6]);
+           name +=(char)buffer[7];       
+         }
+     break;
+// report error to server     
+     default:
+       if(ftime)
+         client.print(fn);
+        else
+         client.print(error_in_format);
+   }  
+ }else{
+   client.print(error_in_format);
+ }
 }
 
 void Action(){
