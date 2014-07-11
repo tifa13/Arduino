@@ -31,7 +31,7 @@ char pass[] = "mostafaaucalex";
 int status = WL_IDLE_STATUS;
 
 // IP & portn number of server because TCP
-IPAddress server(192,168,1,3);
+IPAddress server(192,168,1,5);
 int port=14;
 
 // Initialize the client library
