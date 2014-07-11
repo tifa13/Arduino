@@ -19,22 +19,15 @@
 #include <EEPROM.h>
 
 //places in EEPROM to save first time flag(intially OXFF), name bit 1 and bit 2
-<<<<<<< HEAD
-<<<<<<< HEAD
-int e1=92;
-=======
-int e1=83;
->>>>>>> parent of d9bf5df... solved reconnection issue & sending error command
-=======
-int e1=86;
->>>>>>> parent of d03e8a8... adding length
+
+int e1=180;
 int e2=e1+1;
 int e3=e1+2;
 
 
 // Netowrk SSID & Password
-char ssid[] = "mostafa";  
-char pass[] = "01005381961";  
+char ssid[] = "Mostafaalex";  
+char pass[] = "mostafaaucalex";  
 int status = WL_IDLE_STATUS;
 
 // IP & portn number of server because TCP
@@ -251,11 +244,7 @@ void read_data(){
 void Action(){
   String user((char)buffer[6]);
   user +=(char)buffer[7]; 
-<<<<<<< HEAD
-  String ack ="103,";
-=======
   String ack ="3,";
->>>>>>> parent of d03e8a8... adding length
   ack+=name;
   ack+=",";
   ack+=user;
