@@ -19,25 +19,19 @@
 #include <EEPROM.h>
 
 //places in EEPROM to save first time flag(intially OXFF), name bit 1 and bit 2
-<<<<<<< HEAD
 
-int e1=180;
+int e1=239;
 int e2=e1+1;
 int e3=e1+2;
 
-=======
-int e1=92;
-int e2=e1+1;
-int e3=e1+2;
->>>>>>> parent of 0905b6e... Small changes
 
 // Netowrk SSID & Password
-char ssid[] = "Mostafaalex";  
-char pass[] = "mostafaaucalex";  
+char ssid[] = "mostafa";  
+char pass[] = "01005381961";  
 int status = WL_IDLE_STATUS;
 
 // IP & portn number of server because TCP
-IPAddress server(192,168,1,5);
+IPAddress server(192,168,1,3);
 int port=14;
 
 // Initialize the client library
@@ -92,18 +86,13 @@ void setup() {
      }
 //if connected to server ( just another check to be sure msh lazem    
      if (client.connect(server, port)){
+
 // read flag from memory 
        ftime=EEPROM.read(e1);
 // if first time send 
        if(ftime){
-<<<<<<< HEAD
-         fn= "0,,,,,.";
+         fn= "060,,,,,";
          client.print(fn);
-
-=======
-         fn= "070,,,,,.";
-         client.print(fn);
->>>>>>> parent of 0905b6e... Small changes
 // just to observe
          Serial.println(fn);
          read_data();
@@ -131,26 +120,21 @@ void get_name_from_mem(){
 
 // in a seprate function because used more then one time in different places
 void format_commands(){
-<<<<<<< HEAD
-     recon="1,";
-     watchdog="2,";
-     error_in_format="9,";
-=======
-     recon="091,";
-     watchdog="092,";
-     error_in_format="089,";
->>>>>>> parent of 0905b6e... Small changes
-     String recon_2=",,,,.";
+     recon="081,";
+     watchdog="082,";
+     error_in_format="079,";
+     String recon_2=",,,,";
      recon+=name;
+     Serial.print("name");
+     Serial.println(name);
      recon+=recon_2;
      watchdog+=name;
-     watchdog+=recon_2; 
+     watchdog+=recon_2;     
+     Serial.print("watchdog");
+     Serial.println(watchdog);
      error_in_format+=name;
-<<<<<<< HEAD
      error_in_format+=recon_2; 
-=======
-     error_in_format+=recon_2;  
->>>>>>> parent of 0905b6e... Small changes
+
 }
 
 void loop (){
@@ -210,38 +194,8 @@ void read_data(){
        buffer[i++]=c;
     }
     
-// return buffer to 0  
-  i=0;  
+
   }
-<<<<<<< HEAD
- // 1st level check if formate is okay 
- if ((buffer[0]==byte(46))&&(buffer[10]==byte(46))&&(buffer[2]==byte(44))&&(buffer[5]==byte(44))&&(buffer[8]==byte(44)) ){ 
-//to test recived name is the same as the name i have   
-   String test_name((char)buffer[3]);
-   test_name +=(char)buffer[4];
-   switch (buffer[1]){
- // case 1(49 asci) recive my requested name  
-     case 49:
-       if (ftime){
-//M is 77 in asci
-         if (buffer[9]==77){
-           ftime=false;  
-           EEPROM.write(e1, ftime);
-           EEPROM.write(e2, buffer[3]);
-           EEPROM.write(e3, buffer[4]);
-           String name((char)buffer[3]);
-           name +=(char)buffer[4];
-           Serial.println(name);
-           format_commands();
-         }
-       }
-       break;
-  // case 2(50 asci) do action      
-       case 50:
-         if (name==test_name){
-          Action(); 
-         }
-=======
 
 // only to go in if read data and buffer is full  
   if (i==11){
@@ -253,6 +207,7 @@ void read_data(){
      switch (buffer[1]){
 // case 1(49 asci) recive my requested name  
        case 49:
+         Serial.println("gwa case 1");
          if (ftime){
 //M is 77 in asci
            if (buffer[9]==77){
@@ -260,8 +215,10 @@ void read_data(){
              EEPROM.write(e1, ftime);
              EEPROM.write(e2, buffer[3]);
              EEPROM.write(e3, buffer[4]);
-             String name((char)buffer[3]);
-             name +=(char)buffer[4];
+             String temp((char)buffer[3]);
+             temp +=(char)buffer[4];
+             name=temp;
+             Serial.print("name : ");
              Serial.println(name);
              format_commands();
            }
@@ -281,29 +238,9 @@ void read_data(){
              String name((char)buffer[6]);
              name +=(char)buffer[7];       
            }
->>>>>>> parent of 0905b6e... Small changes
-       break;
-  // case 3 (51 asci)server request me to change name     
-       case 51:
-         if (name==test_name){
-           EEPROM.write(e2, buffer[6]);
-           EEPROM.write(e3, buffer[7]);
-           String name((char)buffer[6]);
-           name +=(char)buffer[7];       
-         }
-     break;
+
 // report error to server     
-<<<<<<< HEAD
-     default:
-       if(ftime)
-         client.print(fn);
-        else
-         client.print(error_in_format);
-   }  
- }else{
-   client.print(error_in_format);
- }
-=======
+
        default:
          if(ftime)
            client.print(fn);
@@ -312,12 +249,12 @@ void read_data(){
      }  
    }else{
      client.print(error_in_format);
+     Serial.println("error_in_format");
    }
        
 // return buffer to 0  
   i=0;  
   }
->>>>>>> parent of 0905b6e... Small changes
 }
 
 void Action(){
