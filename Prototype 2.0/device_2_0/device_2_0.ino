@@ -20,18 +20,18 @@
 
 //places in EEPROM to save first time flag(intially OXFF), name bit 1 and bit 2
 
-int e1=239;
+int e1=3;
 int e2=e1+1;
 int e3=e1+2;
 
 
 // Netowrk SSID & Password
-char ssid[] = "mostafa";  
-char pass[] = "01005381961";  
+char ssid[] = "Mostafaalex";  
+char pass[] = "mostafaaucalex";  
 int status = WL_IDLE_STATUS;
 
 // IP & portn number of server because TCP
-IPAddress server(192,168,1,3);
+IPAddress server(192,168,1,5);
 int port=14;
 
 // Initialize the client library
@@ -45,6 +45,7 @@ String fn;
 String recon;
 String watchdog;
 String error_in_format;
+String rest_of_command=",,,,";
 byte buffer[11];
 int i=0;
 int lamp=8;
@@ -99,7 +100,7 @@ void setup() {
        }
 // if not first time just reconnectrion       
        else{
-         get_name_from_mem();
+         get_name_from_mem(); 
          format_commands();
          client.print(recon);
 // just to observe 
@@ -115,27 +116,30 @@ void get_name_from_mem(){
      name_1=EEPROM.read(e2);
      name=(String)name_1;
      name_1=EEPROM.read(e3);
-     name+=name_1;       
+     name+=name_1;  
+     Serial.print("name from get name func");
+     Serial.println(name);
+          
 }
 
 // in a seprate function because used more then one time in different places
 void format_commands(){
+      Serial.print(" name before formate_command: ");
+      Serial.println(name);
      recon="081,";
      watchdog="082,";
      error_in_format="079,";
-     String recon_2=",,,,";
      recon+=name;
-     Serial.print("name");
-     Serial.println(name);
-     recon+=recon_2;
+     recon+=rest_of_command;
      watchdog+=name;
-     watchdog+=recon_2;     
-     Serial.print("watchdog");
-     Serial.println(watchdog);
+               Serial.println("ana hena"); 
+     watchdog+=rest_of_command;
+               Serial.println("ana hena");     
      error_in_format+=name;
-     error_in_format+=recon_2; 
-
-}
+     error_in_format+=rest_of_command;
+      Serial.print(" name after formate_command: ");
+      Serial.println(name);
+    }
 
 void loop (){
   
@@ -159,8 +163,7 @@ void loop (){
     Serial.println("disconnected from server");
     
 // remove data from incoming buffer
-     client.flush();
-    
+     client.flush();    
 //send reconnection command 
      if (client.connected()){
 // if not first time send reconnection command       
@@ -176,6 +179,20 @@ void loop (){
     
 //Try to reconnect
     client.connect(server, port);
+    
+//REPEATED because u don't know exactly when u will be connected     
+    //send reconnection command 
+     if (client.connected()){
+// if not first time send reconnection command       
+       if (!ftime){
+          client.print(recon);
+          Serial.println(recon);
+       }else{
+// if first time request a name 
+         client.print(fn);
+         Serial.println(fn);
+       }
+     }
   }
 }
 
@@ -207,7 +224,6 @@ void read_data(){
      switch (buffer[1]){
 // case 1(49 asci) recive my requested name  
        case 49:
-         Serial.println("gwa case 1");
          if (ftime){
 //M is 77 in asci
            if (buffer[9]==77){
