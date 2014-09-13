@@ -20,18 +20,19 @@
 
 //places in EEPROM to save first time flag(intially OXFF), name bit 1 and bit 2
 
-int e1=3;
+int e1=21;
 int e2=e1+1;
 int e3=e1+2;
+int saved_state = e1+3;
 
 
 // Netowrk SSID & Password
-char ssid[] = "Mostafaalex";  
-char pass[] = "mostafaaucalex";  
+char ssid[] = "mostafa";  
+char pass[] = "01005381961";  
 int status = WL_IDLE_STATUS;
 
 // IP & portn number of server because TCP
-IPAddress server(192,168,1,5);
+IPAddress server(192,168,1,2);
 int port=14;
 
 // Initialize the client library
@@ -43,13 +44,19 @@ String name;
 // reconnection global because used if disconnected or if not first time
 String fn;
 String recon;
-String watchdog;
+String watchdog_on;
+String watchdog_off;
+String watchdog_failed_open;
+String watchdog_failed_closed;
 String error_in_format;
 String rest_of_command=",,,,";
 byte buffer[11];
 int i=0;
 int lamp=8;
 int latch=9;
+int relay= 2; 
+boolean arduino_state=LOW;
+boolean relay_state;
 // to be removed *************
 int x;
 
@@ -64,6 +71,7 @@ void setup() {
   Serial.println(ssid);
   
 //initialise pins  
+   pinMode(relay,INPUT);
    pinMode(lamp,OUTPUT);
    pinMode(latch,OUTPUT);
 // intiate connection to wifi
@@ -119,22 +127,38 @@ void get_name_from_mem(){
      name+=name_1;  
      Serial.print("name from get name func");
      Serial.println(name);
+//Get saved state from memory      
+     arduino_state =EEPROM.read(saved_state);
+     Serial.print("state from EEPROM");
+     Serial.println(arduino_state);
           
 }
 
 // in a seprate function because used more then one time in different places
 void format_commands(){
+  char c = 255;
       Serial.print(" name before formate_command: ");
       Serial.println(name);
      recon="081,";
-     watchdog="082,";
+     watchdog_on="092,";
+     watchdog_off="092,";
+     watchdog_failed_open="092,";
+     watchdog_failed_closed="092,";
      error_in_format="079,";
      recon+=name;
      recon+=rest_of_command;
-     watchdog+=name;
-               Serial.println("ana hena"); 
-     watchdog+=rest_of_command;
-               Serial.println("ana hena");     
+     
+     
+     watchdog_on+=name;
+     watchdog_off+=name;
+     watchdog_failed_open+=name;
+     watchdog_failed_closed+=name; 
+     
+     watchdog_on+=",,1,,";
+     watchdog_off+=",,0,,";
+     watchdog_failed_open+=",,2,,";
+     watchdog_failed_closed+=",,3,,";
+     
      error_in_format+=name;
      error_in_format+=rest_of_command;
       Serial.print(" name after formate_command: ");
@@ -150,8 +174,21 @@ void loop (){
 //  To be changed just to test new server 
     x++;
   if(x==1000){
-    client.print(watchdog);
-    Serial.println(watchdog);
+    relay_state=digitalRead(relay);
+    
+    if ( (relay_state== HIGH )&&(arduino_state==HIGH)){
+    client.print(watchdog_on);
+    Serial.println(watchdog_on);
+  }else if((relay_state== LOW )&&(arduino_state==LOW)){
+    client.print(watchdog_off);
+    Serial.println(watchdog_off);
+  }else if((relay_state== HIGH )&&(arduino_state==LOW)){
+    client.print(watchdog_failed_closed);
+    Serial.println(watchdog_failed_closed);
+  }else{
+    client.print(watchdog_failed_open);
+    Serial.println(watchdog_failed_open );
+  }
     x=0;
   }
  } 
@@ -240,21 +277,23 @@ void read_data(){
            }
          }
          break;
-// case 2(50 asci) do action      
-         case 50:
+// case 4(52 asci) do action      
+         case 52:
            if (name==test_name){
             Action(); 
            }
          break;
 // case 3 (51 asci)server request me to change name     
-         case 51:
-           if (name==test_name){
+         case 51:{
+             Serial.println("changename");           
              EEPROM.write(e2, buffer[6]);
              EEPROM.write(e3, buffer[7]);
              String name((char)buffer[6]);
-             name +=(char)buffer[7];       
-           }
-
+             name+=(char)buffer[7];
+         }
+             break;
+  
+        
 // report error to server     
 
        default:
@@ -274,29 +313,26 @@ void read_data(){
 }
 
 void Action(){
-  String user((char)buffer[6]);
-  user +=(char)buffer[7]; 
-  String ack ="3,";
-  ack+=name;
-  ack+=",";
-  ack+=user;
+  
   switch(buffer[9]){
-    case byte(255):
+// latch to save state if arduino failed    
+
+    case byte(49):
+      Serial.println("on");
       digitalWrite(lamp,HIGH);
       digitalWrite(latch,HIGH);
-      ack+=",on,,.";
-      client.print(ack);
- // monitor
-      Serial.print(ack);
+// save state to memory so we know what was when we start up because we latch and maintain state      
+      arduino_state=HIGH;
+      EEPROM.write(saved_state, arduino_state);
     break;
-    
-    case byte(0):
+ 
+    case byte(48):
+      Serial.println("off");
       digitalWrite(lamp,LOW);
       digitalWrite(latch,HIGH);
-      ack+=",off,,.";
-      client.print(ack);
- // monitor
-      Serial.print(ack);      
+// save state to memory so we know what was when we start up because we latch and maintain state  
+      arduino_state= LOW;
+      EEPROM.write(saved_state, arduino_state);
     break;
     
     default:
