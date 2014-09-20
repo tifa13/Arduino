@@ -20,7 +20,7 @@
 
 //places in EEPROM to save first time flag(intially OXFF), name bit 1 and bit 2
 
-int e1=21;
+int e1=25;
 int e2=e1+1;
 int e3=e1+2;
 int saved_state = e1+3;
@@ -32,7 +32,7 @@ char pass[] = "01005381961";
 int status = WL_IDLE_STATUS;
 
 // IP & portn number of server because TCP
-IPAddress server(192,168,1,2);
+IPAddress server(192,168,1,3);
 int port=14;
 
 // Initialize the client library
@@ -216,7 +216,7 @@ void loop (){
     
 //Try to reconnect
     client.connect(server, port);
-    
+  
 //REPEATED because u don't know exactly when u will be connected     
     //send reconnection command 
      if (client.connected()){
