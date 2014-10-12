@@ -32,7 +32,7 @@ char pass[] = "01005381961";
 int status = WL_IDLE_STATUS;
 
 // IP & portn number of server because TCP
-IPAddress server(192,168,1,3);
+IPAddress server(192,168,1,2);
 int port=14;
 
 // Initialize the client library
@@ -105,9 +105,13 @@ void setup() {
 // just to observe
          Serial.println(fn);
          read_data();
+// assume first time lamp is connected  it is off         
+         EEPROM.write(saved_state, LOW);
+         
        }
 // if not first time just reconnectrion       
        else{
+// het name and state from memory 
          get_name_from_mem(); 
          format_commands();
          client.print(recon);
@@ -201,6 +205,18 @@ void loop (){
     
 // remove data from incoming buffer
      client.flush();    
+      while(client.connect(server, port) != 1){
+        }
+       if (!ftime){
+          client.print(recon);
+          Serial.println(recon);
+       }else{
+// if first time request a name 
+         client.print(fn);
+         Serial.println(fn);
+ 
+     }
+/*
 //send reconnection command 
      if (client.connected()){
 // if not first time send reconnection command       
@@ -229,7 +245,9 @@ void loop (){
          client.print(fn);
          Serial.println(fn);
        }
+      
      }
+     */
   }
 }
 
