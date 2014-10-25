@@ -32,7 +32,7 @@ char pass[] = "01005381961";
 int status = WL_IDLE_STATUS;
 
 // IP & portn number of server because TCP
-IPAddress server(192,168,1,2);
+IPAddress server(192,168,1,6);
 int port=14;
 
 // Initialize the client library
@@ -308,6 +308,9 @@ void read_data(){
              EEPROM.write(e3, buffer[7]);
              String name((char)buffer[6]);
              name+=(char)buffer[7];
+             Serial.println("new name");
+             Serial.println(name);
+             format_commands();
          }
              break;
   
