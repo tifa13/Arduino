@@ -32,7 +32,7 @@ char pass[] = "01005381961";
 int status = WL_IDLE_STATUS;
 
 // IP & portn number of server because TCP
-IPAddress server(192,168,1,6);
+IPAddress server(192,168,1,3);
 int port=14;
 
 // Initialize the client library
@@ -100,7 +100,7 @@ void setup() {
        ftime=EEPROM.read(e1);
 // if first time send 
        if(ftime){
-         fn= "060,,,,,";
+         fn= "0060,,,,,";
          client.print(fn);
 // just to observe
          Serial.println(fn);
@@ -143,12 +143,12 @@ void format_commands(){
   char c = 255;
       Serial.print(" name before formate_command: ");
       Serial.println(name);
-     recon="081,";
-     watchdog_on="092,";
-     watchdog_off="092,";
-     watchdog_failed_open="092,";
-     watchdog_failed_closed="092,";
-     error_in_format="079,";
+     recon="0081,";
+     watchdog_on="0092,";
+     watchdog_off="0092,";
+     watchdog_failed_open="0092,";
+     watchdog_failed_closed="0092,";
+     error_in_format="0079,";
      recon+=name;
      recon+=rest_of_command;
      
