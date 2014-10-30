@@ -32,7 +32,7 @@ char pass[] = "01005381961";
 int status = WL_IDLE_STATUS;
 
 // IP & portn number of server because TCP
-IPAddress server(192,168,1,2);
+IPAddress server(192,168,1,3);
 int port=14;
 
 // Initialize the client library
