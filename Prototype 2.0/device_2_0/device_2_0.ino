@@ -111,7 +111,10 @@ void setup() {
        }
 // if not first time just reconnectrion       
        else{
-// het name and state from memory 
+// To remain on same state if disconnected from server and arduino had to reset 
+         arduino_state=EEPROM.read(saved_state);
+         digitalWrite(lamp,arduino_state);
+// get name and state from memory 
          get_name_from_mem(); 
          format_commands();
          client.print(recon);
@@ -306,7 +309,8 @@ void read_data(){
              Serial.println("changename");           
              EEPROM.write(e2, buffer[6]);
              EEPROM.write(e3, buffer[7]);
-             String name((char)buffer[6]);
+             String temp((char)buffer[6]);
+             name=temp;
              name+=(char)buffer[7];
              Serial.println("new name");
              Serial.println(name);
